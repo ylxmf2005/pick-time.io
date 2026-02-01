@@ -85,12 +85,14 @@ export default function (props: Props) {
         <DatePicker readonly value={eventData.availableDates}/>
       </div>
 
-      <div className="mt-16">
-        <p className="text-2xl mb-12 font-bold">
-          {t('available_time_label')}
-        </p>
-      </div>
-      <TwoColumnTimePicker readonly value={eventData.availableTimes}/>
+      {eventData.mode === 'datetime' && (
+        <div className="mt-16">
+          <p className="text-2xl mb-12 font-bold">
+            {t('available_time_label')}
+          </p>
+          <TwoColumnTimePicker readonly value={eventData.availableTimes}/>
+        </div>
+      )}
     </PageContainer>
     <Footer/>
   </div>;

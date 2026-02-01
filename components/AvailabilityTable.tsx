@@ -4,7 +4,7 @@ import { DateTimeRange } from '@models/DateTimeRange';
 import { useTranslation } from 'next-i18next';
 import { TouchEvent, useMemo, useRef, useState } from 'react';
 import cx from 'classnames';
-import { TimeRange } from '@models/time';
+import { TimeRange, Time } from '@models/time';
 import AvailableTimeModal from '@components/AvailableTimeModal';
 import isMobile from '@utils/isMobile';
 
@@ -163,6 +163,63 @@ function AvailabilityTable(props: Props) {
       mergedTimeRange.push([t]);
     }
   });
+
+  // For date-only mode, display simple date checkboxes
+  if (event.mode === 'date-only') {
+    return <div className="flex flex-col gap-4">
+      <p className="text-xl font-bold">{t('pick_date_label')}</p>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        {event.availableDates.map(date => {
+          const isSelected = value?.some(v => v.date.equals(date));
+          return <button
+            key={date.toString()}
+            disabled={isReadonly}
+            onClick={() => {
+              if (isReadonly || !onChange || !value) return;
+              // Create a DateTimeRange with a dummy time for date-only mode
+              const dummyTime = TimeRange(Time(0, 0), Time(23, 59));
+              const dtr = DateTimeRange(date, dummyTime);
+              if (isSelected) {
+                onChange(value.filter(v => !v.date.equals(date)));
+              } else {
+                onChange([...value, dtr]);
+              }
+            }}
+            style={isReadonly && result && result.length > 0 ? (() => {
+              let count = 0;
+              result.forEach(pick => {
+                if (pick.picks.some(v => v.date.equals(date))) {
+                  count++;
+                }
+              });
+              const colors = [
+                '#FFFFFF', '#FFF5E6', '#FFEBCC', '#FFE0B3', '#FFD699',
+                '#FFCC80', '#FFC266', '#FFB84D', '#FFAD33', '#FF9900',
+              ];
+              const i = Math.round(count * 10 / result.length);
+              return { backgroundColor: colors[i <= 9 ? i : 9] };
+            })() : isSelected ? { backgroundColor: '#ffc107' } : {}}
+            className={cx(
+              'border-2 border-black rounded-lg px-6 py-4 text-center transition-colors',
+              isReadonly ? 'cursor-default' : 'hover:bg-gray-100'
+            )}
+          >
+            <p className="font-bold">{date.toString()}</p>
+            <p className="text-sm">{t('date_day_short_' + date.getDayCode())}</p>
+            {isReadonly && result && result.length > 0 && (() => {
+              let count = 0;
+              result.forEach(pick => {
+                if (pick.picks.some(v => v.date.equals(date))) {
+                  count++;
+                }
+              });
+              return count > 0 && <p className="text-xs mt-1">{count} / {result.length}</p>;
+            })()}
+          </button>;
+        })}
+      </div>
+    </div>;
+  }
 
   return <>
     <div className="flex w-full">

@@ -1,5 +1,6 @@
 import { DateValue } from '@models/date';
 import { TimeRange } from '@models/time';
+import { EventMode } from '@models/event';
 import { NextApiHandler, NextApiRequest, NextApiResponse } from 'next';
 import { customAlphabet } from 'nanoid';
 import RedisClient from '@utils/getRedis';
@@ -19,6 +20,8 @@ async function handleCreateEvent(req: NextApiRequest, res: NextApiResponse) {
   try {
     const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyz', 6);
     const title: string = req.body.title;
+    const mode: EventMode = req.body.mode || 'datetime';
+
     if (!title) {
       res.status(400).json({ error: ErrorCode.INVALID_REQUEST });
       return;
@@ -29,13 +32,17 @@ async function handleCreateEvent(req: NextApiRequest, res: NextApiResponse) {
 
     const availableDate = d.map((date) => DateValue().fromString(date));
     const availableTime = t.map((time) => TimeRange().fromString(time));
-    if (availableTime.length === 0 || availableDate.length === 0) {
+
+    // For date-only mode, time array can be empty; for datetime mode, both must be present
+    if (availableDate.length === 0 || (mode === 'datetime' && availableTime.length === 0)) {
       res.status(400).json({ error: ErrorCode.INVALID_REQUEST });
       return;
     }
+
     const redis = new RedisClient();
     const insert = {
       title,
+      mode,
       nanoid: nanoid(),
       availableDates: d,
       availableTimes: t

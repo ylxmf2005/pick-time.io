@@ -1,5 +1,6 @@
 import { TimeRange } from '@models/time';
 import { DateValue } from '@models/date';
+import { EventMode } from '@models/event';
 import TwoColumnTimePicker from '@components/TwoColumnTimePicker';
 import Footer from '@components/Footer';
 import TopNav from '@components/TopNav';
@@ -20,6 +21,7 @@ const Home: NextPage = () => {
   const router = useRouter();
 
   const [title, setTitle] = useState('');
+  const [mode, setMode] = useState<EventMode>('datetime');
   const [selectedTime, setSelectedTime] = useState<TimeRange[]>([]);
   const [selectedDate, setSelectedDate] = useState<DateValue[]>([]);
   const [isCreating, setIsCreating] = useState(false);
@@ -44,7 +46,8 @@ const Home: NextPage = () => {
       return;
     }
 
-    if (selectedTime.length === 0) {
+    // Only validate time for datetime mode
+    if (mode === 'datetime' && selectedTime.length === 0) {
       document.getElementById('time-input')
         ?.scrollIntoView({ behavior: 'smooth' });
       setIsMissingTime(true);
@@ -59,8 +62,9 @@ const Home: NextPage = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title,
+          mode,
           availableDates: selectedDate.map(d => d.toString()),
-          availableTimes: selectedTime.map(t => t.toString())
+          availableTimes: mode === 'date-only' ? [] : selectedTime.map(t => t.toString())
         }),
       });
       const data = await res.json();
@@ -97,6 +101,36 @@ const Home: NextPage = () => {
           />
         </div>
 
+        <div className="mt-16">
+          <p className="text-2xl mb-4 font-bold">
+            Mode
+          </p>
+          <div className="flex gap-4">
+            <button
+              onClick={() => setMode('datetime')}
+              className={cx(
+                'px-6 py-3 rounded-xl text-lg font-medium transition-colors',
+                mode === 'datetime'
+                  ? 'bg-amber-500 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              )}
+            >
+              Date & Time
+            </button>
+            <button
+              onClick={() => setMode('date-only')}
+              className={cx(
+                'px-6 py-3 rounded-xl text-lg font-medium transition-colors',
+                mode === 'date-only'
+                  ? 'bg-amber-500 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              )}
+            >
+              Date Only
+            </button>
+          </div>
+        </div>
+
         <div className="mt-16" id="date-input">
           <div className="mb-12">
             <p className="text-2xl font-bold">
@@ -114,22 +148,26 @@ const Home: NextPage = () => {
             }}/>
         </div>
 
-        <div className="mt-16" id="time-input">
-          <div className="mb-12">
-            <p className="text-2xl font-bold">
-              {t('create_event_time_input_label')}
-            </p>
-            {isMissingTime && <p className="text-amber-500">
-              {t('create_event_time_input_error')}
-            </p>}
-          </div>
-        </div>
-        <TwoColumnTimePicker
-          value={selectedTime}
-          onChange={v => {
-            setSelectedTime(v);
-            v.length > 0 && setIsMissingTime(false);
-          }}/>
+        {mode === 'datetime' && (
+          <>
+            <div className="mt-16" id="time-input">
+              <div className="mb-12">
+                <p className="text-2xl font-bold">
+                  {t('create_event_time_input_label')}
+                </p>
+                {isMissingTime && <p className="text-amber-500">
+                  {t('create_event_time_input_error')}
+                </p>}
+              </div>
+            </div>
+            <TwoColumnTimePicker
+              value={selectedTime}
+              onChange={v => {
+                setSelectedTime(v);
+                v.length > 0 && setIsMissingTime(false);
+              }}/>
+          </>
+        )}
         <button
           disabled={isCreating}
           onClick={submit}

@@ -9,6 +9,7 @@ import DatePicker from '@components/DatePicker';
 import TwoColumnTimePicker from '@components/TwoColumnTimePicker';
 import { getEventProps } from '@services/getEventProps';
 import toast, { Toaster } from 'react-hot-toast';
+import { useState, useEffect } from 'react';
 
 interface Props {
   event: SerializedEventData;
@@ -19,6 +20,12 @@ export default function (props: Props) {
   const { t } = useTranslation();
   const eventData = parseEventData(event);
   const router = useRouter();
+  const [baseUrl, setBaseUrl] = useState('');
+
+  useEffect(() => {
+    setBaseUrl(window.location.origin);
+  }, []);
+
   const copyToast = () =>
     toast(t('copy_successful'), {
       duration: 1500,
@@ -39,7 +46,7 @@ export default function (props: Props) {
            border-black rounded-xl px-2 py-1">
           <a
             className="flex-grow pr-4"
-            href={'https://pick-time.io/' + (router.locale === 'en-US'
+            href={baseUrl + '/' + (router.locale === 'en-US'
               ? '' : (router.locale + '/')) + event.nanoid}
             target="_blank"
             rel="noopener noreferrer"
@@ -48,7 +55,7 @@ export default function (props: Props) {
               id="event-link"
               readOnly
               className="w-full"
-              value={'https://pick-time.io/' + (router.locale === 'en-US'
+              value={baseUrl + '/' + (router.locale === 'en-US'
                 ? '' : (router.locale + '/')) + event.nanoid}
             />
           </a>

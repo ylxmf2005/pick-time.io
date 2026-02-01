@@ -167,7 +167,7 @@ function AvailabilityTable(props: Props) {
   // For date-only mode, display simple date checkboxes
   if (event.mode === 'date-only') {
     return <div className="flex flex-col gap-4">
-      <p className="text-xl font-bold">{t('pick_date_label')}</p>
+      {!isReadonly && <p className="text-xl font-bold">{t('pick_date_label')}</p>}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
         {event.availableDates.map(date => {
           const isSelected = value?.some(v => v.date.equals(date));

@@ -48,6 +48,7 @@
   "invalid_password": "這個名稱已被使用，如果是你使用的，請輸入正確的密碼。",
   "password_description_label": "如果有輸入密碼，你可以隨時修改提交的結果",
   "password_label": "密碼（選填）",
+  "pick_date_label": "選擇你有空的日期",
   "result_description": "你可以參加活動的時段已經順利提交了。",
   "result_title": "做得好！",
   "schedule_now": "選擇你有空的時間",

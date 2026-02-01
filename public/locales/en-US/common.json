@@ -48,6 +48,7 @@
   "invalid_password": "The username has been used by another user. Or you have entered an invalid password.",
   "password_description_label": "Password is use for your later modification.",
   "password_label": "Password (Optional)",
+  "pick_date_label": "Pick your available dates",
   "result_description": "Your availability has been submitted.",
   "result_title": "Well Done!",
   "schedule_now": "Schedule Now",
